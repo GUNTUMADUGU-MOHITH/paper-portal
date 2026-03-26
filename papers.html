@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Question Papers &mdash; SBTET Question Paper Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 16px; scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0f1117;
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 10% 0%, rgba(99,102,241,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 90% 100%, rgba(139,92,246,0.1) 0%, transparent 55%);
+}
+body > * { position: relative; z-index: 1; }
+
+/* HEADER */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(15,17,23,0.94);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 0 1.25rem;
+}
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 58px; gap: 12px;
+}
+.site-name {
+  font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+  font-weight: 700; color: #fff; white-space: nowrap;
+}
+.site-name small {
+  display: block; font-size: 0.58rem; font-weight: 500;
+  color: #64748b; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.hdr-right { display: flex; align-items: center; gap: 10px; }
+.scheme-tag {
+  background: #6366f1; color: #fff; font-size: 0.62rem;
+  font-weight: 700; padding: 3px 9px; border-radius: 4px; white-space: nowrap;
+}
+.back-link {
+  padding: 7px 14px; border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px; font-size: 0.8rem; font-weight: 500; color: #94a3b8;
+  background: rgba(255,255,255,0.03); transition: all 0.2s; white-space: nowrap;
+}
+.back-link:hover { border-color: rgba(99,102,241,0.4); color: #fff; }
+
+/* TOP BAR */
+.topbar { max-width: 1200px; margin: 0 auto; padding: 20px 1.25rem 0; }
+.breadcrumb {
+  font-size: 0.74rem; color: #475569;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.breadcrumb a { color: #818cf8; }
+.breadcrumb a:hover { text-decoration: underline; }
+.bc-sep { opacity: 0.4; }
+.page-title {
+  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
+  font-weight: 800; color: #fff; letter-spacing: -0.02em; margin-bottom: 4px;
+}
+.page-sub { font-size: 0.83rem; color: #475569; }
+
+/* CONTROLS */
+.controls {
+  max-width: 1200px; margin: 0 auto; padding: 14px 1.25rem;
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+}
+.search-box {
+  flex: 1; min-width: 200px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 8px;
+  color: #e2e8f0; font-family: 'Inter', sans-serif; font-size: 0.87rem;
+  outline: none; transition: border-color 0.2s;
+}
+.search-box:focus { border-color: rgba(99,102,241,0.5); }
+.search-box::placeholder { color: #475569; }
+.qfilter-group { display: flex; gap: 7px; flex-wrap: wrap; }
+.qfilter {
+  padding: 8px 14px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 6px; background: rgba(255,255,255,0.03);
+  font-size: 0.78rem; font-weight: 600; color: #64748b;
+  transition: all 0.2s; white-space: nowrap;
+}
+.qfilter:hover { border-color: rgba(99,102,241,0.4); color: #fff; }
+.qfilter.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+
+/* MAIN LAYOUT: sidebar + panel */
+.content-wrap {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 1.25rem 70px;
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+/* SIDEBAR */
+.sidebar-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  position: sticky; top: 70px;
+  max-height: calc(100vh - 88px);
+  overflow-y: auto;
+}
+.sidebar-title {
+  font-size: 0.68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: #475569; padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.subject-list { padding: 6px; }
+.subj-item {
+  padding: 10px 12px; border-radius: 8px;
+  cursor: pointer; transition: all 0.18s;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  -webkit-tap-highlight-color: transparent;
+}
+.subj-item:hover { background: rgba(255,255,255,0.04); }
+.subj-item.active {
+  background: rgba(99,102,241,0.14);
+  border-color: rgba(99,102,241,0.3);
+}
+.subj-code { font-size: 0.66rem; color: #475569; font-weight: 600; margin-bottom: 2px; }
+.subj-name { font-size: 0.84rem; font-weight: 500; color: #cbd5e1; line-height: 1.35; }
+.subj-item.active .subj-name { color: #a5b4fc; font-weight: 600; }
+.subj-count {
+  display: inline-block; margin-top: 4px;
+  font-size: 0.64rem; font-weight: 700;
+  background: rgba(99,102,241,0.15); color: #818cf8;
+  padding: 1px 7px; border-radius: 99px;
+}
+
+/* PAPERS PANEL */
+.papers-wrap {}
+.papers-head {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+}
+.papers-head-title { font-size: 1.05rem; font-weight: 700; color: #fff; }
+.papers-head-count { font-size: 0.77rem; color: #475569; }
+
+/* Paper row */
+.paper-row {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 14px 16px;
+  margin-bottom: 8px; transition: all 0.2s;
+}
+.paper-row:hover { border-color: rgba(99,102,241,0.3); transform: translateX(2px); }
+.paper-info { flex: 1; min-width: 0; }
+.paper-filename {
+  font-size: 0.88rem; font-weight: 600; color: #e2e8f0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  margin-bottom: 4px;
+}
+.paper-meta { font-size: 0.72rem; color: #475569; display: flex; flex-wrap: wrap; gap: 10px; }
+.dl-btn {
+  flex-shrink: 0; padding: 8px 18px;
+  background: #6366f1; color: #fff;
+  border: none; border-radius: 6px;
+  font-size: 0.8rem; font-weight: 700;
+  transition: all 0.2s; white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(99,102,241,0.35);
+}
+.dl-btn:hover { background: #4f46e5; transform: translateY(-1px); }
+.dl-btn:active { transform: translateY(0); }
+
+/* Skeleton */
+.skel { border-radius: 10px; margin-bottom: 8px; height: 72px; background: linear-gradient(90deg,rgba(255,255,255,0.04),rgba(255,255,255,0.07),rgba(255,255,255,0.04)); background-size: 200%; animation: shimmer 1.4s infinite; }
+@keyframes shimmer { 0%{background-position:200%}100%{background-position:-200%} }
+
+/* Empty */
+.empty-box { text-align: center; padding: clamp(32px,6vw,56px) 16px; }
+.empty-title { font-size: 1rem; font-weight: 700; color: #475569; margin-bottom: 6px; }
+.empty-sub   { font-size: 0.82rem; color: #334155; }
+
+/* Inline selectors (no-param fallback) */
+.inline-sel-wrap { max-width: 1200px; margin: 0 auto; padding: 0 1.25rem 16px; }
+.inline-sel-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 20px;
+}
+.isel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 16px; }
+.isel-lbl { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #475569; margin-bottom: 9px; }
+.pill-row  { display: flex; flex-wrap: wrap; gap: 7px; }
+.pill {
+  padding: 6px 14px; border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 0.79rem; font-weight: 600; color: #94a3b8;
+  background: transparent; transition: all 0.18s; -webkit-tap-highlight-color: transparent;
+}
+.pill:hover { border-color: rgba(99,102,241,0.45); color: #fff; }
+.pill.active { background: #6366f1; border-color: #6366f1; color: #fff; }
+.load-papers-btn {
+  padding: 10px 24px; background: #6366f1; color: #fff;
+  border: none; border-radius: 7px; font-size: 0.88rem; font-weight: 700;
+  transition: all 0.2s;
+}
+.load-papers-btn:hover { background: #4f46e5; }
+
+/* Toast */
+#toast-box { position: fixed; bottom: 18px; right: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; max-width: calc(100vw - 36px); }
+.toast-msg { padding: 11px 15px; border-radius: 7px; font-size: 0.83rem; font-weight: 500; background: rgba(18,20,30,0.98); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 18px rgba(0,0,0,0.4); animation: slideIn 0.28s ease; }
+.toast-msg.ok  { border-left: 3px solid #4ade80; }
+.toast-msg.err { border-left: 3px solid #f87171; }
+@keyframes slideIn  { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+@keyframes slideOut { to{opacity:0;transform:translateX(20px)} }
+@keyframes fadeInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.anim-in { animation: fadeInUp 0.32s ease forwards; }
+
+/* RESPONSIVE */
+@media (max-width: 860px) {
+  .content-wrap { grid-template-columns: 1fr; gap: 14px; }
+
+  /* Sidebar becomes horizontal scroll strip */
+  .sidebar-card { position: static; max-height: none; overflow-x: auto; overflow-y: hidden; }
+  .subject-list { display: flex; flex-direction: row; flex-wrap: nowrap; gap: 6px; padding: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .subj-item { flex-shrink: 0; white-space: nowrap; padding: 9px 14px; border-radius: 99px; margin-bottom: 0; }
+  .subj-code { display: none; }
+  .subj-count { display: none; }
+  .sidebar-title { white-space: nowrap; }
+
+  /* Paper rows */
+  .paper-row { flex-wrap: wrap; gap: 10px; }
+  .paper-filename { white-space: normal; }
+  .dl-btn { width: 100%; justify-content: center; text-align: center; }
+}
+
+@media (max-width: 560px) {
+  .controls { flex-direction: column; align-items: stretch; }
+  .search-box { min-width: unset; }
+  .qfilter-group { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .qfilter { flex-shrink: 0; }
+  .isel-grid { grid-template-columns: 1fr; }
+  .hdr-right .scheme-tag { display: none; }
+  #toast-box { right: 10px; bottom: 10px; }
+  .toast-msg { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="/" class="site-name">
+      SBTET Question Paper Portal
+      <small>C23 Scheme &middot; AP Diploma</small>
+    </a>
+    <div class="hdr-right">
+      <div class="scheme-tag">C23</div>
+      <a href="/" class="back-link">Home</a>
+    </div>
+  </div>
+</header>
+
+<div class="topbar">
+  <div class="breadcrumb">
+    <a href="/">Home</a>
+    <span class="bc-sep">/</span>
+    <span>Question Papers</span>
+    <span id="bc-extra" style="display:none;">
+      <span class="bc-sep">/</span><span id="bc-label"></span>
+    </span>
+  </div>
+  <h1 class="page-title" id="page-title">Question Papers</h1>
+  <p class="page-sub" id="page-sub">Browse and download C23 scheme question papers</p>
+</div>
+
+<div class="controls">
+  <input type="text" class="search-box" id="search-input" placeholder="Search subjects...">
+  <div class="qfilter-group" id="sem-filters"></div>
+</div>
+
+<!-- Inline selectors when no URL params -->
+<div class="inline-sel-wrap" id="inline-sel" style="display:none;">
+  <div class="inline-sel-card">
+    <div class="isel-grid">
+      <div>
+        <div class="isel-lbl">Branch</div>
+        <div class="pill-row">
+          {% for b in branches %}
+          <button class="pill" data-branch="{{ b.code }}">{{ b.code }}</button>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <div class="isel-lbl">Semester</div>
+        <div class="pill-row">
+          {% for s in semesters %}
+          <button class="pill" data-sem="{{ s.name }}">{{ s.name }}</button>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <button class="load-papers-btn" onclick="loadFromInline()">Show Subjects</button>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="content-wrap" id="main-content" style="display:none;">
+  <div>
+    <div class="sidebar-card">
+      <div class="sidebar-title">Subjects</div>
+      <div class="subject-list" id="subject-list"></div>
+    </div>
+  </div>
+  <div id="papers-panel">
+    <div class="empty-box">
+      <div class="empty-title">Select a Subject</div>
+      <div class="empty-sub">Click any subject on the left to view its question papers</div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading state -->
+<div id="loading-state" style="max-width:1200px;margin:0 auto;padding:60px 1.25rem;text-align:center;color:#475569;font-size:0.9rem;">
+  Loading...
+</div>
+
+<footer style="border-top:1px solid rgba(255,255,255,0.07);padding:24px 1.25rem;text-align:center;color:#334155;font-size:0.76rem;line-height:1.7;">
+  SBTET Question Paper Portal &mdash; C23 Scheme &middot; For educational purposes only
+</footer>
+
+<div id="toast-box"></div>
+
+<script>
+var urlP = new URLSearchParams(window.location.search);
+var cBranch = urlP.get('branch') || sessionStorage.getItem('branch') || '';
+var cSem    = urlP.get('semester') || sessionStorage.getItem('semester') || '';
+var cSubjectId = null;
+var allSubjects = [];
+var papersCache = {};
+var iBranch = null, iSem = null;
+
+var BNAMES = {
+  'CME':'Computer Engineering',
+  'ECE':'Electrical & Communication Engineering',
+  'ME':'Mechanical Engineering',
+  'CIVIL':'Civil Engineering'
+};
+
+$(function(){
+  if(cBranch && cSem){
+    loadSubjects(cBranch, cSem);
+  } else {
+    $('#loading-state').hide();
+    $('#inline-sel').show();
+    {% for s in semesters %}
+    $('#sem-filters').append('<button class="qfilter" data-sem="{{ s.name }}">{{ s.name }}</button>');
+    {% endfor %}
+  }
+
+  $(document).on('click', '.qfilter[data-sem]', function(){
+    var sem = $(this).data('sem');
+    if(cSem === sem && $(this).hasClass('active')){
+      $(this).removeClass('active'); cSem = ''; renderSubjects(allSubjects);
+    } else {
+      $('.qfilter').removeClass('active'); $(this).addClass('active');
+      cSem = sem;
+      if(cBranch) loadSubjects(cBranch, cSem);
+    }
+  });
+
+  $('#search-input').on('input', function(){
+    var q = $(this).val().trim().toLowerCase();
+    if(!q){ renderSubjects(allSubjects); return; }
+    renderSubjects(allSubjects.filter(function(s){
+      return s.name.toLowerCase().includes(q) || (s.code && s.code.toLowerCase().includes(q));
+    }));
+  });
+
+  $(document).on('click', '.pill[data-branch]', function(){
+    $('.pill[data-branch]').removeClass('active'); $(this).addClass('active');
+    iBranch = $(this).data('branch');
+  });
+  $(document).on('click', '.pill[data-sem]', function(){
+    $('.pill[data-sem]').removeClass('active'); $(this).addClass('active');
+    iSem = $(this).data('sem');
+  });
+});
+
+function loadFromInline(){
+  if(!iBranch || !iSem){ toast('Select both branch and semester','err'); return; }
+  cBranch = iBranch; cSem = iSem;
+  $('#inline-sel').hide();
+  loadSubjects(cBranch, cSem);
+}
+
+function loadSubjects(branch, sem){
+  $('#loading-state').show().text('Loading subjects...');
+  $('#main-content').hide();
+  $.ajax({
+    url: '/get-subjects',
+    data: { branch: branch, semester: sem },
+    success: function(data){
+      allSubjects = data.subjects;
+      $('#loading-state').hide();
+      $('#main-content').show();
+      renderSubjects(allSubjects);
+      updateHeader(branch, sem);
+      buildFilters();
+    },
+    error: function(){
+      $('#loading-state').text('Failed to load. Please try again.');
+      toast('Failed to load subjects','err');
+    }
+  });
+}
+
+function buildFilters(){
+  $('#sem-filters').empty();
+  var sems = [...new Set(allSubjects.map(function(s){ return s.semester; }))];
+  sems.forEach(function(s){
+    var b = $('<button class="qfilter" data-sem="'+s+'">'+s+'</button>');
+    if(s === cSem) b.addClass('active');
+    $('#sem-filters').append(b);
+  });
+}
+
+function updateHeader(branch, sem){
+  $('#page-title').text(branch + ' — ' + sem);
+  $('#page-sub').text((BNAMES[branch]||branch) + ' / C23 Scheme');
+  $('#bc-label').text(branch + ' / ' + sem);
+  $('#bc-extra').show();
+  document.title = branch + ' ' + sem + ' — SBTET Question Paper Portal';
+}
+
+function renderSubjects(subjects){
+  var list = $('#subject-list').empty();
+  if(!subjects.length){
+    list.append('<div style="padding:16px;text-align:center;color:#475569;font-size:0.82rem;">No subjects found</div>');
+    return;
+  }
+  subjects.forEach(function(s){
+    var countHtml = (papersCache[s.id] !== undefined) ? '<span class="subj-count">'+papersCache[s.id].length+'</span>' : '';
+    var item = $('<div class="subj-item'+(cSubjectId==s.id?' active':'')+'" data-id="'+s.id+'"><div class="subj-code">'+s.code+'</div><div class="subj-name">'+s.name+'</div>'+countHtml+'</div>');
+    item.on('click', function(){
+      $('.subj-item').removeClass('active'); $(this).addClass('active');
+      cSubjectId = s.id;
+      loadPapers(s);
+      if(window.innerWidth <= 860){
+        var panel = document.getElementById('papers-panel');
+        setTimeout(function(){ panel.scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+      }
+    });
+    list.append(item);
+  });
+}
+
+function loadPapers(subject){
+  if(papersCache[subject.id] !== undefined){ renderPapers(subject, papersCache[subject.id]); return; }
+  $('#papers-panel').html('<div class="papers-head"><div class="papers-head-title">'+subject.name+'</div></div><div class="skel"></div><div class="skel" style="opacity:0.6;"></div>');
+  $.ajax({
+    url: '/get-papers', method: 'POST', contentType: 'application/json',
+    data: JSON.stringify({ subject_id: subject.id }),
+    success: function(data){
+      papersCache[subject.id] = data.papers;
+      renderPapers(subject, data.papers);
+      $('.subj-item[data-id="'+subject.id+'"]').find('.subj-count').remove();
+      $('.subj-item[data-id="'+subject.id+'"]').append('<span class="subj-count">'+data.papers.length+'</span>');
+    },
+    error: function(){ $('#papers-panel').html('<div class="empty-box"><div class="empty-title">Load Failed</div><div class="empty-sub">Could not load papers. Please try again.</div></div>'); }
+  });
+}
+
+function renderPapers(subject, papers){
+  var panel = $('#papers-panel').empty();
+  panel.append('<div class="papers-head"><div class="papers-head-title">'+subject.name+'</div><div class="papers-head-count">'+papers.length+' paper'+(papers.length!==1?'s':'')+'</div></div>');
+  if(!papers.length){
+    panel.append('<div class="empty-box"><div class="empty-title">No Papers Available</div><div class="empty-sub">No question papers have been uploaded for this subject yet. Check back later.</div></div>');
+    return;
+  }
+  papers.forEach(function(p, i){
+    var d = new Date(p.upload_date);
+    var dateStr = d.getDate()+' '+'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ')[d.getMonth()]+' '+d.getFullYear();
+    var row = $('<div class="paper-row anim-in" style="animation-delay:'+(i*0.05)+'s"><div class="paper-info"><div class="paper-filename">'+(p.original_name||'Question Paper')+'</div><div class="paper-meta"><span>Uploaded: '+dateStr+'</span><span>Downloads: '+(p.download_count||0)+'</span><span>'+subject.code+'</span></div></div><a href="/download/'+p.id+'" class="dl-btn" target="_blank" onclick="markDl(this)">Download PDF</a></div>');
+    panel.append(row);
+  });
+}
+
+function markDl(el){
+  var a = $(el);
+  a.text('Opening...').css('opacity','0.6');
+  setTimeout(function(){ a.text('Download PDF').css('opacity','1'); toast('Download started!','ok'); }, 1200);
+}
+
+function toast(msg, type){
+  var t = $('<div class="toast-msg '+(type||'ok')+'">'+msg+'</div>');
+  $('#toast-box').append(t);
+  setTimeout(function(){ t.css('animation','slideOut 0.28s forwards'); setTimeout(function(){ t.remove(); },300); }, 3400);
+}
+</script>
+</body>
+</html>

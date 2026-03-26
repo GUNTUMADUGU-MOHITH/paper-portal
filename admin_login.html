@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin Access &mdash; SBTET Question Paper Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:#0f1117; color:#e2e8f0;
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  padding:1.25rem;
+  -webkit-font-smoothing:antialiased;
+}
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 60% 60% at 50% 40%, rgba(99,102,241,0.1) 0%, transparent 65%);
+}
+.card {
+  width:100%; max-width:400px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:14px;
+  padding:clamp(24px,5vw,38px);
+  position:relative; z-index:1;
+}
+.portal-name {
+  text-align:center;
+  font-size:0.75rem;
+  font-weight:600;
+  color:#475569;
+  text-transform:uppercase;
+  letter-spacing:0.09em;
+  margin-bottom:20px;
+}
+h2 {
+  text-align:center; font-size:clamp(1.2rem,4vw,1.45rem);
+  font-weight:800; color:#fff; margin-bottom:5px;
+}
+.sub { text-align:center; color:#475569; font-size:0.82rem; margin-bottom:26px; }
+
+.tabs {
+  display:flex; background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:7px; padding:3px; margin-bottom:22px; gap:3px;
+}
+.tab-btn {
+  flex:1; padding:8px 6px; text-align:center; border-radius:5px;
+  font-size:0.79rem; font-weight:600; cursor:pointer; transition:all 0.18s;
+  color:#64748b; border:none; background:transparent; font-family:'Inter',sans-serif;
+}
+.tab-btn.active { background:#6366f1; color:#fff; }
+
+.form-group { margin-bottom:14px; }
+.form-group label {
+  display:block; font-size:0.7rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.09em;
+  color:#475569; margin-bottom:7px;
+}
+.form-group input {
+  width:100%; padding:11px 13px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:7px; color:#e2e8f0;
+  font-family:'Inter',sans-serif; font-size:1rem;
+  outline:none; transition:border-color 0.2s;
+  -webkit-appearance:none;
+}
+.form-group input:focus { border-color:rgba(99,102,241,0.55); }
+.form-group input::placeholder { color:#334155; }
+
+.note { font-size:0.74rem; color:#334155; margin-bottom:14px; }
+
+.submit-btn {
+  width:100%; padding:12px;
+  background:#6366f1; color:#fff;
+  border:none; border-radius:7px;
+  font-family:'Inter',sans-serif; font-weight:700; font-size:0.92rem;
+  cursor:pointer; transition:all 0.2s;
+  box-shadow:0 3px 14px rgba(99,102,241,0.35);
+  margin-top:6px;
+}
+.submit-btn:hover { background:#4f46e5; transform:translateY(-1px); }
+.submit-btn:active { transform:translateY(0); }
+
+.error-box {
+  background:rgba(248,113,113,0.08);
+  border:1px solid rgba(248,113,113,0.2);
+  border-radius:7px; padding:11px 13px;
+  font-size:0.82rem; color:#fca5a5;
+  margin-bottom:18px;
+}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="portal-name">SBTET Question Paper Portal</div>
+  <h2>Admin Access</h2>
+  <p class="sub">Authorized personnel only</p>
+
+  {% if error %}
+  <div class="error-box">{{ error }}</div>
+  {% endif %}
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-creds" onclick="show('creds')">Username &amp; Password</button>
+    <button class="tab-btn" id="tab-code"  onclick="show('code')">Secret Code</button>
+  </div>
+
+  <form method="POST" autocomplete="off">
+    <div id="panel-creds">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Enter username" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Enter password">
+      </div>
+    </div>
+    <div id="panel-code" style="display:none;">
+      <div class="form-group">
+        <label>Secret Code</label>
+        <input type="password" name="secret_code" placeholder="Enter secret access code" autocomplete="off">
+      </div>
+      <p class="note">Enter the secret code to access the admin panel.</p>
+    </div>
+    <button type="submit" class="submit-btn">Access Admin Panel</button>
+  </form>
+</div>
+
+<script>
+function show(type){
+  var isCreds = type === 'creds';
+  document.getElementById('tab-creds').className = 'tab-btn' + (isCreds ? ' active' : '');
+  document.getElementById('tab-code').className  = 'tab-btn' + (!isCreds ? ' active' : '');
+  document.getElementById('panel-creds').style.display = isCreds ? '' : 'none';
+  document.getElementById('panel-code').style.display  = !isCreds ? '' : 'none';
+}
+</script>
+</body>
+</html>

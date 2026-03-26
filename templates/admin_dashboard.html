@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Admin Dashboard &mdash; SBTET Question Paper Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { -webkit-text-size-adjust:100%; }
+body {
+  font-family:'Inter',system-ui,sans-serif;
+  background:#0f1117; color:#e2e8f0;
+  min-height:100vh; display:flex; flex-direction:row;
+  -webkit-font-smoothing:antialiased;
+}
+a { text-decoration:none; color:inherit; }
+button { font-family:inherit; cursor:pointer; }
+
+body::before { content:''; position:fixed; inset:0; background:radial-gradient(ellipse 60% 50% at 10% 30%, rgba(99,102,241,0.06) 0%, transparent 55%); pointer-events:none; z-index:0; }
+
+/* SIDEBAR */
+.sidebar {
+  width:220px; flex-shrink:0; height:100vh; position:sticky; top:0;
+  background:rgba(255,255,255,0.02);
+  border-right:1px solid rgba(255,255,255,0.07);
+  display:flex; flex-direction:column; z-index:10;
+}
+.sb-brand { padding:20px 16px; border-bottom:1px solid rgba(255,255,255,0.07); }
+.sb-portal { font-size:0.62rem; font-weight:600; color:#475569; text-transform:uppercase; letter-spacing:0.09em; margin-bottom:6px; }
+.sb-title { font-size:0.9rem; font-weight:800; color:#fff; line-height:1.3; }
+.sb-tag { display:inline-block; font-size:0.58rem; font-weight:700; background:#6366f1; color:#fff; padding:2px 7px; border-radius:3px; margin-top:5px; }
+.sb-nav { flex:1; padding:12px 8px; overflow-y:auto; }
+.nav-section { font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#334155; padding:8px 8px 4px; }
+.nav-btn {
+  display:flex; align-items:center; gap:0;
+  width:100%; padding:10px 10px; border-radius:7px; border:1px solid transparent;
+  font-size:0.84rem; font-weight:500; color:#64748b;
+  background:transparent; text-align:left; transition:all 0.18s;
+  margin-bottom:1px; cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.nav-btn:hover { background:rgba(255,255,255,0.04); color:#e2e8f0; }
+.nav-btn.active { background:rgba(99,102,241,0.14); color:#a5b4fc; border-color:rgba(99,102,241,0.25); font-weight:600; }
+.sb-footer { padding:12px 8px; border-top:1px solid rgba(255,255,255,0.07); }
+.logout-a { display:block; padding:9px 10px; border-radius:7px; font-size:0.83rem; color:#f87171; transition:background 0.18s; }
+.logout-a:hover { background:rgba(248,113,113,0.1); }
+
+/* MOBILE NAV */
+.mob-nav {
+  display:none; position:sticky; top:0; z-index:200;
+  background:rgba(15,17,23,0.96); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+}
+.mob-nav-row { display:flex; min-width:max-content; }
+.mob-btn {
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:10px 18px; font-size:0.67rem; font-weight:600;
+  color:#475569; border:none; background:transparent;
+  border-bottom:2px solid transparent; white-space:nowrap;
+  transition:all 0.18s; cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.mob-btn.active { color:#818cf8; border-bottom-color:#6366f1; }
+.mob-btn span { font-size:0.78rem; font-weight:700; }
+
+/* MAIN */
+.main { flex:1; overflow-y:auto; min-width:0; position:relative; z-index:1; }
+.topbar {
+  padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.07);
+  display:flex; align-items:center; justify-content:space-between;
+  background:rgba(15,17,23,0.85); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  position:sticky; top:0; z-index:9; gap:10px; flex-wrap:wrap;
+}
+.topbar-title { font-size:clamp(1rem,2.5vw,1.3rem); font-weight:800; color:#fff; }
+.admin-tag { font-size:0.68rem; font-weight:700; padding:3px 11px; border-radius:4px; background:rgba(99,102,241,0.15); color:#818cf8; border:1px solid rgba(99,102,241,0.25); white-space:nowrap; }
+
+/* PANELS */
+.panel { display:none; padding:clamp(14px,3vw,24px) clamp(12px,3vw,24px); }
+.panel.active { display:block; }
+
+/* STATS */
+.stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px; }
+.stat-box { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px; }
+.stat-val { font-size:1.7rem; font-weight:800; color:#818cf8; display:block; margin-bottom:2px; }
+.stat-lbl { font-size:0.7rem; color:#475569; text-transform:uppercase; letter-spacing:0.06em; }
+
+/* CARDS */
+.dash-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:clamp(16px,3vw,22px); }
+.dash-card-title { font-size:0.88rem; font-weight:700; color:#fff; margin-bottom:16px; }
+
+/* FORM */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.fg { margin-bottom:14px; }
+.fg label { display:block; font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#475569; margin-bottom:7px; }
+select, input[type=text] {
+  width:100%; padding:10px 12px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:7px; color:#e2e8f0;
+  font-family:'Inter',sans-serif; font-size:0.88rem;
+  outline:none; transition:border-color 0.2s;
+  -webkit-appearance:none; appearance:none;
+}
+select:focus, input[type=text]:focus { border-color:rgba(99,102,241,0.5); }
+
+/* FILE DROP */
+.file-drop {
+  border:2px dashed rgba(99,102,241,0.2); border-radius:10px;
+  padding:clamp(20px,4vw,30px) 16px; text-align:center; cursor:pointer;
+  background:rgba(99,102,241,0.03); transition:all 0.2s;
+}
+.file-drop:hover, .file-drop.over { border-color:#6366f1; background:rgba(99,102,241,0.07); }
+.drop-main { font-size:0.88rem; color:#64748b; margin-bottom:4px; }
+.drop-main strong { color:#818cf8; }
+.drop-note { font-size:0.74rem; color:#334155; }
+.file-name { margin-top:10px; font-size:0.82rem; color:#818cf8; font-weight:600; }
+
+/* BUTTONS */
+.btn-primary {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:10px 22px; background:#6366f1; color:#fff;
+  border:none; border-radius:7px;
+  font-size:0.86rem; font-weight:700;
+  transition:all 0.2s; box-shadow:0 3px 12px rgba(99,102,241,0.35);
+}
+.btn-primary:hover { background:#4f46e5; transform:translateY(-1px); }
+.btn-primary:disabled { opacity:0.45; pointer-events:none; }
+
+/* PROGRESS */
+.prog-wrap { margin-top:10px; display:none; }
+.prog-row { display:flex; justify-content:space-between; font-size:0.72rem; color:#475569; margin-bottom:5px; }
+.prog-bg { height:4px; background:rgba(255,255,255,0.06); border-radius:99px; overflow:hidden; }
+.prog-fill { height:100%; background:#6366f1; border-radius:99px; width:0%; transition:width 0.22s; }
+
+/* TABLE */
+.table-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
+.table-search input { max-width:260px; }
+.tbl-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { width:100%; border-collapse:separate; border-spacing:0; min-width:520px; }
+thead th { padding:10px 13px; text-align:left; font-size:0.67rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#334155; border-bottom:1px solid rgba(255,255,255,0.07); }
+tbody tr:hover td { background:rgba(255,255,255,0.02); }
+tbody td { padding:11px 13px; font-size:0.83rem; border-bottom:1px solid rgba(255,255,255,0.04); }
+.fname-pill { display:inline-block; max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:600; color:#a5b4fc; font-size:0.8rem; vertical-align:middle; }
+.act-row { display:flex; gap:6px; flex-wrap:wrap; }
+.view-a { padding:5px 11px; border-radius:5px; font-size:0.76rem; font-weight:600; color:#67e8f9; background:rgba(103,232,249,0.08); border:1px solid rgba(103,232,249,0.2); transition:all 0.18s; }
+.view-a:hover { background:rgba(103,232,249,0.16); }
+.del-a { padding:5px 11px; border-radius:5px; font-size:0.76rem; font-weight:600; color:#f87171; background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.2); cursor:pointer; transition:all 0.18s; }
+.del-a:hover { background:rgba(248,113,113,0.18); }
+.empty-td { text-align:center; padding:40px; color:#334155; font-size:0.84rem; }
+
+/* MODAL */
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.72); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); z-index:1000; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity 0.22s; }
+.overlay.open { opacity:1; pointer-events:all; }
+.modal { background:#12141e; border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:clamp(20px,4vw,28px); max-width:360px; width:100%; transform:scale(0.9); transition:transform 0.22s; text-align:center; }
+.overlay.open .modal { transform:scale(1); }
+.modal h3 { font-size:1.05rem; font-weight:800; color:#fff; margin-bottom:7px; }
+.modal p { font-size:0.82rem; color:#475569; line-height:1.65; margin-bottom:20px; }
+.modal-btns { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+.btn-cancel { padding:9px 20px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:transparent; color:#94a3b8; font-size:0.84rem; transition:all 0.18s; }
+.btn-cancel:hover { background:rgba(255,255,255,0.04); }
+.btn-del { padding:9px 20px; border-radius:6px; background:#ef4444; color:#fff; border:none; font-size:0.84rem; font-weight:700; transition:all 0.18s; }
+.btn-del:hover { background:#dc2626; }
+
+/* TOAST */
+#toast-box { position:fixed; bottom:18px; right:18px; z-index:9999; display:flex; flex-direction:column; gap:8px; max-width:calc(100vw - 36px); }
+.toast-msg { padding:11px 15px; border-radius:7px; font-size:0.82rem; font-weight:500; background:rgba(14,16,24,0.98); border:1px solid rgba(255,255,255,0.08); box-shadow:0 4px 18px rgba(0,0,0,0.4); animation:slideIn 0.28s ease; }
+.toast-msg.ok  { border-left:3px solid #4ade80; }
+.toast-msg.err { border-left:3px solid #f87171; }
+@keyframes slideIn  { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+@keyframes slideOut { to{opacity:0;transform:translateX(20px)} }
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  body { flex-direction:column; }
+  .sidebar { display:none; }
+  .mob-nav { display:block; }
+  .main { width:100%; }
+  .topbar { position:static; padding:12px 1rem; }
+  .stats-row { grid-template-columns:repeat(3,1fr); gap:8px; }
+  .stat-box { padding:12px 10px; }
+  .stat-val { font-size:1.35rem; }
+  .two-col { grid-template-columns:1fr; }
+  .table-header { flex-direction:column; align-items:stretch; }
+  .table-search input { max-width:100%; }
+  #toast-box { right:10px; bottom:10px; }
+  .toast-msg { width:100%; }
+}
+@media(max-width:460px){
+  .stats-row { grid-template-columns:1fr 1fr; }
+  .modal-btns { flex-direction:column; }
+  .btn-cancel, .btn-del { width:100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- MOBILE NAV -->
+<nav class="mob-nav">
+  <div class="mob-nav-row">
+    <button class="mob-btn active" id="mob-overview" onclick="goPanel('overview')"><span>Overview</span></button>
+    <button class="mob-btn" id="mob-upload" onclick="goPanel('upload')"><span>Upload</span></button>
+    <button class="mob-btn" id="mob-papers" onclick="goPanel('papers')"><span>All Papers</span></button>
+    <a href="/admin/logout" class="mob-btn" style="color:#f87171;"><span>Logout</span></a>
+  </div>
+</nav>
+
+<!-- DESKTOP SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-portal">SBTET Question Paper Portal</div>
+    <div class="sb-title">Admin Dashboard</div>
+    <div><span class="sb-tag">C23 Scheme</span></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-section">Main</div>
+    <button class="nav-btn active" id="nav-overview" onclick="goPanel('overview')">Overview</button>
+    <button class="nav-btn" id="nav-upload" onclick="goPanel('upload')">Upload Paper</button>
+    <div class="nav-section" style="margin-top:6px;">Manage</div>
+    <button class="nav-btn" id="nav-papers" onclick="goPanel('papers')">All Papers</button>
+  </nav>
+  <div class="sb-footer">
+    <a href="/admin/logout" class="logout-a">Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <h1 class="topbar-title" id="topbar-title">Overview</h1>
+    <span class="admin-tag">Admin</span>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div class="panel active" id="panel-overview">
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-val">{{ papers|length }}</span>
+        <span class="stat-lbl">Papers</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val">4</span>
+        <span class="stat-lbl">Branches</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-val">{{ papers|sum(attribute='download_count') }}</span>
+        <span class="stat-lbl">Downloads</span>
+      </div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-card-title">Recent Uploads</div>
+      {% if papers %}
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr><th>File</th><th>Branch</th><th>Subject</th><th>Date</th><th>DL</th></tr>
+          </thead>
+          <tbody>
+          {% for p in papers[:10] %}
+          <tr>
+            <td><span class="fname-pill" title="{{ p.original_name or 'Question Paper' }}">{{ p.original_name or 'Question Paper' }}</span></td>
+            <td style="color:#64748b;font-size:0.78rem;">{{ p.branch_name }}</td>
+            <td style="font-size:0.8rem;">{{ p.subject_name }}</td>
+            <td style="color:#475569;font-size:0.76rem;">{{ p.upload_date[:10] }}</td>
+            <td style="color:#818cf8;font-size:0.82rem;">{{ p.download_count }}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-td">No papers uploaded yet. <span style="color:#818cf8;cursor:pointer;" onclick="goPanel('upload')">Upload your first paper</span></div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- UPLOAD -->
+  <div class="panel" id="panel-upload">
+    <div class="dash-card" style="max-width:600px;">
+      <div class="dash-card-title">Upload Question Paper</div>
+
+      <div class="two-col">
+        <div class="fg">
+          <label>Branch</label>
+          <select id="up-branch" onchange="fetchSubjects()">
+            <option value="">Select Branch</option>
+            {% for b in branches %}
+            <option value="{{ b.code }}">{{ b.code }} &mdash; {{ b.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="fg">
+          <label>Semester</label>
+          <select id="up-sem" onchange="fetchSubjects()">
+            <option value="">Select Semester</option>
+            {% for s in semesters %}
+            <option value="{{ s.name }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label>Subject</label>
+        <select id="up-subject">
+          <option value="">Select branch and semester first</option>
+        </select>
+      </div>
+
+      <div class="fg">
+        <label>Question Paper PDF</label>
+        <div class="file-drop" id="file-drop" onclick="document.getElementById('file-in').click()">
+          <div class="drop-main"><strong>Click to select</strong> or drag and drop</div>
+          <div class="drop-note">PDF files only &mdash; max 50 MB</div>
+          <div class="file-name" id="file-name" style="display:none;"></div>
+        </div>
+        <input type="file" id="file-in" accept=".pdf" style="display:none;" onchange="filePicked(this)">
+      </div>
+
+      <div class="prog-wrap" id="prog-wrap">
+        <div class="prog-row"><span>Uploading...</span><span id="prog-pct">0%</span></div>
+        <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+      </div>
+
+      <button class="btn-primary" id="up-btn" onclick="doUpload()">Upload Paper</button>
+    </div>
+  </div>
+
+  <!-- ALL PAPERS -->
+  <div class="panel" id="panel-papers">
+    <div class="dash-card">
+      <div class="table-header">
+        <div class="dash-card-title" style="margin-bottom:0;">All Papers</div>
+        <div class="table-search">
+          <input type="text" placeholder="Search papers..." oninput="filterTbl(this.value)">
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table id="papers-tbl">
+          <thead>
+            <tr><th>#</th><th>File</th><th>Branch</th><th>Subject</th><th>Date</th><th>DL</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+          {% if papers %}
+            {% for p in papers %}
+            <tr data-id="{{ p.id }}">
+              <td style="color:#334155;font-size:0.74rem;">{{ loop.index }}</td>
+              <td><span class="fname-pill" title="{{ p.original_name or 'Paper' }}">{{ p.original_name or 'Paper' }}</span></td>
+              <td style="color:#64748b;font-size:0.78rem;">{{ p.branch_name }}</td>
+              <td style="font-size:0.8rem;">{{ p.subject_name }}</td>
+              <td style="color:#475569;font-size:0.76rem;">{{ p.upload_date[:10] }}</td>
+              <td style="color:#818cf8;font-size:0.8rem;">{{ p.download_count }}</td>
+              <td>
+                <div class="act-row">
+                  <a href="/download/{{ p.id }}" class="view-a" target="_blank">View</a>
+                  <button class="del-a" onclick="askDel({{ p.id }}, '{{ (p.original_name or 'this paper')|replace("'","&#39;") }}')">Remove</button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="7" class="empty-td">No papers uploaded yet.</td></tr>
+          {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- CONFIRM MODAL -->
+<div class="overlay" id="del-overlay">
+  <div class="modal">
+    <h3>Remove Paper?</h3>
+    <p id="del-msg">This will remove the record from the database. The file will remain on the server permanently.</p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeDel()">Cancel</button>
+      <button class="btn-del" id="confirm-del">Remove</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-box"></div>
+
+<script>
+var PANEL_TITLES = { overview:'Overview', upload:'Upload Paper', papers:'All Papers' };
+
+function goPanel(name){
+  $('.panel').removeClass('active');
+  $('.nav-btn').removeClass('active');
+  $('.mob-btn').removeClass('active');
+  $('#panel-'+name).addClass('active');
+  $('#nav-'+name).addClass('active');
+  $('#mob-'+name).addClass('active');
+  $('#topbar-title').text(PANEL_TITLES[name]||name);
+  window.scrollTo(0,0);
+}
+
+/* Subjects for upload */
+function fetchSubjects(){
+  var br = $('#up-branch').val(), sem = $('#up-sem').val();
+  if(!br || !sem) return;
+  $.ajax({
+    url:'/admin/get-subjects', data:{branch:br,semester:sem},
+    success:function(data){
+      var sel = $('#up-subject').empty().append('<option value="">Select Subject</option>');
+      data.subjects.forEach(function(s){ sel.append('<option value="'+s.id+'">'+s.code+' &mdash; '+s.name+'</option>'); });
+    }
+  });
+}
+
+/* File drop */
+var dz = document.getElementById('file-drop');
+dz.addEventListener('dragover',function(e){ e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave',function(){ dz.classList.remove('over'); });
+dz.addEventListener('drop',function(e){
+  e.preventDefault(); dz.classList.remove('over');
+  var f = e.dataTransfer.files[0];
+  if(f && f.type==='application/pdf'){
+    document.getElementById('file-in').files = e.dataTransfer.files;
+    showFileName(f.name, f.size);
+  } else { toast('Only PDF files allowed','err'); }
+});
+
+function filePicked(inp){
+  var f = inp.files[0]; if(!f) return;
+  if(!f.name.toLowerCase().endsWith('.pdf')){ toast('Only PDF files allowed','err'); inp.value=''; return; }
+  showFileName(f.name, f.size);
+}
+function showFileName(name, size){
+  var mb = (size/1024/1024).toFixed(1);
+  $('#file-name').show().text(name + ' (' + mb + ' MB)');
+}
+
+/* Upload */
+function doUpload(){
+  var subj = $('#up-subject').val(), file = $('#file-in')[0].files[0];
+  if(!subj){ toast('Select a subject first','err'); return; }
+  if(!file){ toast('Select a PDF file','err'); return; }
+  var fd = new FormData();
+  fd.append('subject_id', subj); fd.append('file', file);
+  $('#up-btn').prop('disabled',true).text('Uploading...');
+  $('#prog-wrap').show();
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST','/upload-paper');
+  xhr.upload.onprogress = function(e){
+    var p = Math.round(e.loaded/e.total*100);
+    $('#prog-fill').css('width',p+'%'); $('#prog-pct').text(p+'%');
+  };
+  xhr.onload = function(){
+    var r = JSON.parse(xhr.responseText);
+    if(r.success){ toast(r.message,'ok'); setTimeout(function(){ location.reload(); },1100); }
+    else { toast(r.message,'err'); }
+    $('#up-btn').prop('disabled',false).text('Upload Paper');
+    $('#prog-wrap').hide(); $('#prog-fill').css('width','0%');
+  };
+  xhr.onerror = function(){ toast('Upload failed. Check connection.','err'); $('#up-btn').prop('disabled',false).text('Upload Paper'); };
+  xhr.send(fd);
+}
+
+/* Delete */
+var delId = null;
+function askDel(id, name){
+  delId = id;
+  $('#del-msg').text('"'+name+'" will be removed from the database. The file stays on the server permanently.');
+  $('#del-overlay').addClass('open');
+}
+function closeDel(){ $('#del-overlay').removeClass('open'); delId = null; }
+
+$('#confirm-del').on('click',function(){
+  if(!delId) return;
+  $(this).prop('disabled',true).text('Removing...');
+  $.ajax({
+    url:'/delete-paper', method:'POST', contentType:'application/json',
+    data: JSON.stringify({paper_id:delId}),
+    success:function(r){
+      if(r.success){
+        $('tr[data-id="'+delId+'"]').fadeOut(300, function(){ $(this).remove(); });
+        toast(r.message,'ok');
+      } else { toast(r.message,'err'); }
+      closeDel();
+      $('#confirm-del').prop('disabled',false).text('Remove');
+    }
+  });
+});
+
+/* Table search */
+function filterTbl(q){
+  var ql = q.toLowerCase();
+  $('#papers-tbl tbody tr').each(function(){
+    $(this).toggle(!ql || $(this).text().toLowerCase().includes(ql));
+  });
+}
+
+/* Toast */
+function toast(msg, type){
+  var t = $('<div class="toast-msg '+(type||'ok')+'">'+msg+'</div>');
+  $('#toast-box').append(t);
+  setTimeout(function(){ t.css('animation','slideOut 0.28s forwards'); setTimeout(function(){ t.remove(); },300); },3400);
+}
+</script>
+</body>
+</html>
